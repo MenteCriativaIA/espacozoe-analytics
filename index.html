@@ -134,6 +134,34 @@
   #cod-g:focus { outline: none; border-color: var(--verde); background: #fff; }
   .item .dica { font-size: 12.5px; color: var(--suave); }
 </style>
+<style>
+  /* Bloco de endereço: fica ACIMA do card, fora dele, para ser tocado em vez
+     de digitado. Alvo de toque com altura folgada, que ele usa no celular. */
+  li.linkbloco { list-style: none; margin: 0 0 -2px; }
+  li.linkbloco > a, li.linkbloco > button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    background: var(--verde-claro); border: 1px solid #cfe0d5; border-bottom: 0;
+    border-radius: 12px 12px 4px 4px; padding: 13px 16px; margin: 0;
+    font: inherit; font-size: 16px; color: var(--verde); font-weight: 600;
+    text-decoration: none; cursor: pointer;
+  }
+  li.linkbloco > button.copiado { background: #dcebe1; }
+  li.linkbloco .ico { flex: 0 0 auto; font-size: 18px; line-height: 1; }
+  li.linkbloco .end {
+    flex: 1; min-width: 0; overflow-wrap: anywhere;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15.5px; letter-spacing: -.01em;
+  }
+  li.linkbloco .obs {
+    flex: 0 0 auto; font-size: 12px; font-weight: 600; color: var(--suave);
+    letter-spacing: .02em; white-space: nowrap;
+  }
+  li.linkbloco + li.item { border-top-left-radius: 4px; border-top-right-radius: 4px; }
+  @media (max-width: 420px) {
+    li.linkbloco > a, li.linkbloco > button { flex-wrap: wrap; row-gap: 2px; }
+    li.linkbloco .obs { width: 100%; padding-left: 28px; }
+  }
+</style>
 </head>
 <body>
 
@@ -235,8 +263,12 @@
   // só para item novo.
 
   var P1 = [
-    { id: 'p1', t: 'Abrir analytics.google.com no navegador',
-      d: 'Pode ser no celular ou no computador. Digite o endereço na barra de cima, não pesquise no Google.' },
+    { id: 'p1', t: 'Abrir o Google Analytics no navegador',
+      // Link para FORA do card, acima dele: assim ele toca em vez de digitar.
+      // Abre em aba nova de proposito — se abrisse na mesma, ele perderia
+      // esta pagina e o lugar onde parou.
+      link: { url: 'https://analytics.google.com', rotulo: 'analytics.google.com' },
+      d: 'Pode ser no celular ou no computador. Toque no endereço aí em cima que ele abre numa aba nova — esta página fica aberta atrás, guardando onde você parou.' },
     { id: 'p2', t: 'Conferir que é o SEU Gmail antes de tocar em nada',
       d: 'Olhe a foto (ou a letra) do seu perfil no canto de cima, do lado direito. Se estiver logado com outro e-mail, troque agora — se a conta nascer no e-mail errado, depois dá trabalho.' },
     { id: 'p3', t: 'Clicar no botão colorido "Começar a usar"',
@@ -262,8 +294,9 @@
   var P2 = [
     { id: 'q1', destaque: true, t: 'Dos três botões, clicar em "Web"',
       d: 'Os três são: Web, App Android e App iOS. O seu é o primeiro. Se você clicar num dos de aplicativo por engano, não é grave — dá para criar outro depois.' },
-    { id: 'q2', destaque: true, t: 'No endereço do site, escrever só espacozoe.psc.br',
-      d: 'Sem https:// e sem www. O "https" já vem numa caixinha separada, do lado esquerdo do campo — só confira que está em https e não em http.' },
+    { id: 'q2', destaque: true, t: 'No endereço do site, colar só o endereço puro',
+      copiar: { valor: 'espacozoe.psc.br', rotulo: 'Copiar espacozoe.psc.br' },
+      d: 'Use o botão aí em cima para copiar, em vez de digitar — um caractere errado aqui e o medidor não conta nada. Sem https:// e sem www: o "https" já vem numa caixinha separada, do lado esquerdo do campo, e você só confere que está em https e não em http.' },
     { id: 'q3', t: 'No nome, escrever Espaco Zoe site',
       d: 'É só um apelido para você reconhecer depois. Qualquer nome serve.' },
     { id: 'q4', t: 'Deixar a chavinha ligada, do jeito que veio',
@@ -306,6 +339,28 @@
     var ul = document.getElementById(alvo);
     if (!ul) return;
     itens.forEach(function (it) {
+      // Endereco para abrir, ou valor para copiar, sai de dentro do card e vira
+      // um bloco proprio ACIMA dele. Motivo: dentro do card viraria texto que ele
+      // teria de digitar na mao, e digitar errado e um dos jeitos de a coisa
+      // falhar em silencio.
+      if (it.link) {
+        var la = document.createElement('li');
+        la.className = 'linkbloco';
+        la.innerHTML = '<a href="' + it.link.url + '" target="_blank" rel="noopener">' +
+          '<span class="ico" aria-hidden="true">&#8599;</span>' +
+          '<span class="end">' + it.link.rotulo + '</span>' +
+          '<span class="obs">abre numa aba nova</span></a>';
+        ul.appendChild(la);
+      }
+      if (it.copiar) {
+        var lc = document.createElement('li');
+        lc.className = 'linkbloco';
+        lc.innerHTML = '<button type="button" class="copiavalor" data-valor="' + it.copiar.valor + '">' +
+          '<span class="ico" aria-hidden="true">&#10697;</span>' +
+          '<span class="end">' + it.copiar.valor + '</span>' +
+          '<span class="obs">toque para copiar</span></button>';
+        ul.appendChild(lc);
+      }
       var li = document.createElement('li');
       li.className = 'item' + (it.destaque ? ' destaque' : '');
       li.innerHTML =
@@ -417,6 +472,19 @@
       });
     });
   }
+
+  // Delegado no documento para não depender da ordem em que os blocos foram montados.
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest ? ev.target.closest('.copiavalor') : null;
+    if (!b) return;
+    var span = b.querySelector('.obs');
+    var antes = span.textContent;
+    copia(b.getAttribute('data-valor'), function () {
+      span.textContent = 'copiado ✓';
+      b.classList.add('copiado');
+      setTimeout(function () { span.textContent = antes; b.classList.remove('copiado'); }, 2600);
+    });
+  });
 
   document.getElementById('btn-limpar').addEventListener('click', function () {
     if (!confirm('Isso desmarca tudo e apaga o código digitado. Continuar?')) return;

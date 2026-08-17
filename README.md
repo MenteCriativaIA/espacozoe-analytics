@@ -11,8 +11,8 @@ formato e com a mesma identidade visual.
 
 ## Por que ela existe
 
-Havia um passo a passo anterior, escrito para ir por WhatsApp, e ele estava errado em dois
-pontos. Foi descartado antes de chegar a ser enviado:
+Um passo a passo anterior foi enviado por WhatsApp em julho de 2026, em cinco linhas, e não
+teve resposta. Ele estava incompleto em dois pontos:
 
 1. Dizia que criar a **propriedade** entrega o código `G-`. Não entrega. A propriedade é
    uma pasta vazia; o código só nasce ao criar um **fluxo de dados** do tipo Web dentro
@@ -39,6 +39,11 @@ a página descreve onde ele fica em vez de inventar um nome.
 - **Fora dos buscadores** (`noindex`) — é uma página para um link direto, não para o Google.
 - **Confere o que foi colado** antes de a pessoa mandar, para pegar os três erros comuns:
   o outro identificador (só números), o bloco `gtag` de programação, e o código incompleto.
+- **Tem saída para quem já começou antes.** Como o roteiro de julho mandava criar a conta e a
+  propriedade, quem seguiu só o começo dele já tem as duas — e mandar criar de novo produziria
+  uma segunda propriedade, com o risco de o código sair da errada. A página abre perguntando
+  isso, ensina a conferir pelo nome no canto superior esquerdo, e oferece o atalho direto para
+  a segunda metade (Administrador → Fluxos de dados → Adicionar fluxo).
 
 Este repositório é público porque o GitHub só serve páginas de repositórios públicos no
 plano gratuito. Por isso ele contém **apenas** esta página: o projeto do site vive em

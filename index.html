@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Pagina feita para UMA pessoa. Fora dos buscadores de proposito. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Espaço Zoe — ligar o contador de visitas</title>
+<style>
+  :root {
+    --papel: #fbf8f3;
+    --cartao: #ffffff;
+    --linha: #e6ded1;
+    --tinta: #2f2b26;
+    --suave: #6d6459;
+    --verde: #3f6b52;
+    --verde-claro: #eaf1ec;
+    --terra: #a8613f;
+    --terra-claro: #fbeee7;
+    --sombra: 0 1px 3px rgba(47, 43, 38, .07);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    padding: 0 0 72px;
+  }
+  .env { max-width: 680px; margin: 0 auto; padding: 0 18px; }
+
+  header { padding: 34px 0 8px; }
+  .selo {
+    display: inline-block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--verde); font-weight: 700; margin-bottom: 10px;
+  }
+  h1 { font-size: 27px; line-height: 1.25; margin: 0 0 14px; font-weight: 700; }
+  .carta { font-size: 16.5px; color: #413b34; }
+  .carta p { margin: 0 0 14px; }
+  .carta strong { color: var(--tinta); }
+
+  .barra-fixa {
+    position: sticky; top: 0; z-index: 20; background: rgba(251, 248, 243, .96);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--linha); padding: 10px 0;
+    margin-bottom: 22px;
+  }
+  .barra-linha { display: flex; align-items: center; gap: 12px; }
+  .trilho { flex: 1; height: 8px; background: var(--linha); border-radius: 99px; overflow: hidden; }
+  .preenche { height: 100%; width: 0; background: var(--verde); border-radius: 99px; transition: width .35s ease; }
+  .conta { font-size: 13px; color: var(--suave); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  h2 {
+    font-size: 19px; margin: 34px 0 4px; font-weight: 700; display: flex;
+    align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  h2 .n {
+    font-size: 12px; font-weight: 700; color: var(--verde); background: var(--verde-claro);
+    border-radius: 99px; padding: 3px 9px; letter-spacing: .04em;
+  }
+  .sub { color: var(--suave); font-size: 14.5px; margin: 0 0 16px; }
+
+  ul.lista { list-style: none; margin: 0; padding: 0; }
+  li.item {
+    background: var(--cartao); border: 1px solid var(--linha); border-radius: 12px;
+    margin-bottom: 10px; box-shadow: var(--sombra); overflow: hidden;
+    transition: opacity .2s ease, border-color .2s ease;
+  }
+  li.item.feito { opacity: .58; border-color: #d9e3db; }
+  label.toque {
+    display: flex; gap: 13px; align-items: flex-start; padding: 15px 16px;
+    cursor: pointer; user-select: none;
+  }
+  .caixa {
+    flex: 0 0 auto; width: 24px; height: 24px; margin-top: 1px; border: 2px solid #cfc5b6;
+    border-radius: 7px; background: #fff; display: grid; place-items: center;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .caixa svg { width: 15px; height: 15px; stroke: #fff; stroke-width: 3.2; fill: none;
+    stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity .15s ease; }
+  input[type=checkbox] { position: absolute; opacity: 0; width: 0; height: 0; }
+  input:checked + .caixa { background: var(--verde); border-color: var(--verde); }
+  input:checked + .caixa svg { opacity: 1; }
+  input:focus-visible + .caixa { outline: 3px solid rgba(63, 107, 82, .35); outline-offset: 2px; }
+  .txt { flex: 1; min-width: 0; }
+  .txt b { display: block; font-weight: 600; font-size: 16px; }
+  li.item.feito .txt b { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .txt small { display: block; color: var(--suave); font-size: 14px; margin-top: 4px; line-height: 1.5; }
+
+  .resposta { padding: 0 16px 15px 53px; }
+  .resposta textarea {
+    width: 100%; min-height: 62px; resize: vertical; border: 1px solid var(--linha);
+    border-radius: 9px; padding: 9px 11px; font: inherit; font-size: 15px; background: #fdfcfa;
+    color: var(--tinta);
+  }
+  .resposta textarea:focus { outline: none; border-color: var(--verde); background: #fff; }
+  .resposta .dica { font-size: 12.5px; color: var(--suave); margin: 0 0 6px; }
+
+  .destaque { border-left: 4px solid var(--terra); background: var(--terra-claro); }
+  .aviso-caixa {
+    background: var(--terra-claro); border: 1px solid #efd9cc; border-radius: 12px;
+    padding: 15px 17px; margin: 0 0 10px; font-size: 15px;
+  }
+  .aviso-caixa b { color: var(--terra); }
+
+  .rodape {
+    position: fixed; left: 0; right: 0; bottom: 0; background: rgba(251, 248, 243, .97);
+    border-top: 1px solid var(--linha); padding: 11px 0; z-index: 30;
+    backdrop-filter: blur(6px);
+  }
+  .rodape .env { display: flex; gap: 10px; align-items: center; }
+  button.acao {
+    flex: 1; border: 0; background: var(--verde); color: #fff; font: inherit; font-weight: 600;
+    font-size: 15.5px; padding: 13px 16px; border-radius: 11px; cursor: pointer;
+  }
+  button.acao:active { transform: translateY(1px); }
+  button.limpo {
+    flex: 0 0 auto; background: transparent; color: var(--suave); border: 1px solid var(--linha);
+    font: inherit; font-size: 14px; padding: 13px 14px; border-radius: 11px; cursor: pointer;
+  }
+  .aviso-salvo { font-size: 13px; color: var(--suave); text-align: center; padding: 14px 0 0; }
+  .fim { margin: 38px 0 0; padding: 20px 0 0; border-top: 1px solid var(--linha);
+    color: var(--suave); font-size: 14.5px; }
+  .fim p { margin: 0 0 10px; }
+  a { color: var(--verde); }
+  @media (max-width: 420px) {
+    h1 { font-size: 23px; }
+    .env { padding: 0 14px; }
+  }
+</style>
+<style>
+  .cod { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--verde-claro); color: var(--verde); border-radius: 5px;
+    padding: 1px 5px; font-size: .95em; font-weight: 700; }
+  #cod-g:focus { outline: none; border-color: var(--verde); background: #fff; }
+  .item .dica { font-size: 12.5px; color: var(--suave); }
+</style>
+</head>
+<body>
+
+<div class="env">
+  <header>
+    <div class="selo">Espaço Zoe · espacozoe.psc.br</div>
+    <h1>Lionel, vamos ligar o contador de visitas do site</h1>
+    <div class="carta">
+      <p>O site já está no ar. Falta só ligar o medidor que conta quantas pessoas entram e quantas
+        clicam no botão do WhatsApp — que é o número que vai te dizer se o site está te trazendo
+        paciente ou não.</p>
+      <p><strong>Como você sabe que terminou:</strong> você vai ter na mão um código curto que começa
+        com <b class="cod">G-</b> — parecido com <b class="cod">G-A1B2C3D4E5</b>. Enquanto não tiver
+        esse código, não terminou. É a única coisa que eu preciso de volta.</p>
+      <p>São uns 10 minutos, é tudo de graça, e <strong>vai clicando conforme for fazendo</strong> —
+        a página guarda sozinha o que você marcou, mesmo que você feche e volte depois.</p>
+    </div>
+  </header>
+</div>
+
+<div class="barra-fixa">
+  <div class="env barra-linha">
+    <div class="trilho"><div class="preenche" id="preenche"></div></div>
+    <div class="conta" id="conta">0 de 0</div>
+  </div>
+</div>
+
+<main class="env">
+
+  <div class="aviso-caixa" style="margin-top:4px">
+    <b>Leia isto antes de começar — é aqui que trava.</b><br>
+    No meio do caminho vai aparecer uma tela que <b>parece o fim</b>, com três botões lado a lado
+    escritos <b>Web</b>, <b>App Android</b> e <b>App iOS</b>. <b>Não é o fim.</b> Se você fechar a
+    página nesse ponto, fica sem o código — e foi o que aconteceu na primeira tentativa. É justo
+    depois desses três botões que o código nasce.
+  </div>
+
+  <h2>Parte 1 — criar a conta <span class="n">11 cliques</span></h2>
+  <p class="sub">Nada aqui gera o código ainda. Isso é só montar a "pasta" onde ele vai morar.</p>
+  <ul class="lista" id="lista-p1"></ul>
+
+  <h2>Parte 2 — a parte que gera o código <span class="n">não pare aqui</span></h2>
+  <p class="sub">É esta metade que faltou na primeira vez. Sem ela, o código não existe.</p>
+  <ul class="lista" id="lista-p2"></ul>
+
+  <h2>Três avisos rápidos</h2>
+  <p class="sub">Não são passos. São os três jeitos de copiar a coisa errada.</p>
+  <div id="avisos"></div>
+
+  <h2>Se você fechou a tela sem copiar</h2>
+  <div class="aviso-caixa" style="background:var(--verde-claro);border-color:#cfe0d5">
+    <b style="color:var(--verde)">Não perdeu nada.</b> O código fica guardado, e você
+    <b>não precisa criar outro</b> — criar outro é o que gera dois ou três e ninguém sabe qual vale.
+    Para achar o que já existe: no menu do lado esquerdo, <b>Administrador</b> →
+    <b>Fluxos de dados</b> → aba <b>Web</b> → clique no fluxo que você criou → leia a
+    <b>primeira linha</b>.
+  </div>
+
+  <h2>Me manda o código <span class="n">o fim</span></h2>
+  <p class="sub">Cole aqui e toque no botão verde lá embaixo. A página confere se é o código certo
+    antes de você mandar.</p>
+  <div class="item" style="padding:15px 16px">
+    <label for="cod-g" class="dica" style="display:block;font-size:13px;color:var(--suave);margin:0 0 7px">
+      O código que começa com G-</label>
+    <input type="text" id="cod-g" placeholder="G-..." autocapitalize="characters" autocomplete="off"
+           spellcheck="false" style="width:100%;border:1px solid var(--linha);border-radius:9px;
+           padding:11px 12px;font:inherit;font-size:17px;letter-spacing:.04em;background:#fdfcfa;
+           color:var(--tinta)">
+    <p id="veredito" class="dica" style="margin:9px 0 0;font-size:13.5px"></p>
+  </div>
+
+  <h2>Extra — só se eu te pedir</h2>
+  <p class="sub">Como me dar acesso para eu configurar, sem você me passar senha de nada.</p>
+  <ul class="lista" id="lista-extra"></ul>
+
+  <div class="fim">
+    <p>Se em qualquer passo a sua tela estiver escrita de um jeito diferente do que está aqui, não é
+      erro seu: o Google usa nomes diferentes para a mesma coisa (esse código aparece como
+      "ID de métricas", "ID da métrica" ou "ID de medição", dependendo da tela). <b>Vá pelo
+      formato, não pelo nome:</b> o que você procura é uma linha curta que começa com a letra G e um
+      tracinho.</p>
+    <p>E se travar em qualquer ponto, me liga. Dez minutos no telefone e a gente resolve junto —
+      não perde tempo brigando com a tela sozinho.</p>
+  </div>
+</main>
+
+<div class="rodape">
+  <div class="env">
+    <button class="acao" id="btn-copiar">Copiar o código pra me mandar</button>
+    <button class="limpo" id="btn-limpar">Recomeçar</button>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  // Cada item tem um id ESTÁVEL: é a chave com que a marcação é guardada no
+  // navegador dele. Mudar um id apaga o progresso daquele item, então id novo
+  // só para item novo.
+
+  var P1 = [
+    { id: 'p1', t: 'Abrir analytics.google.com no navegador',
+      d: 'Pode ser no celular ou no computador. Digite o endereço na barra de cima, não pesquise no Google.' },
+    { id: 'p2', t: 'Conferir que é o SEU Gmail antes de tocar em nada',
+      d: 'Olhe a foto (ou a letra) do seu perfil no canto de cima, do lado direito. Se estiver logado com outro e-mail, troque agora — se a conta nascer no e-mail errado, depois dá trabalho.' },
+    { id: 'p3', t: 'Clicar no botão colorido "Começar a usar"',
+      d: 'É o único botão que avança. Se na sua tela o texto estiver um pouco diferente, é esse mesmo: o botão grande e colorido, no meio ou no alto da tela.' },
+    { id: 'p4', t: 'Nome da conta: escrever Espaco Zoe',
+      d: 'Sem cedilha e sem acento é mais seguro, para não dar problema em nenhuma tela.' },
+    { id: 'p5', t: 'Não mexer nas caixinhas de compartilhar dados → "Próxima"',
+      d: 'São quatro caixinhas logo abaixo do nome. Nenhuma delas muda nada no que a gente precisa. Deixe como vier e siga.' },
+    { id: 'p6', t: 'Nome da propriedade: escrever Site Espaco Zoe',
+      d: 'Atenção: aqui NÃO se digita o endereço do site. O endereço vem bem no fim, na Parte 2.' },
+    { id: 'p7', t: 'Escolher fuso horário do Brasil (Brasília) e moeda Real → "Próxima"',
+      d: 'São duas listas na mesma tela. Se aparecerem duas listinhas para escolher, você está no lugar certo.' },
+    { id: 'p8', t: 'Ramo e tamanho da empresa → "Próxima"',
+      d: 'Escolha a opção mais parecida com saúde ou bem-estar, e a menor faixa de funcionários (1 a 10). Não muda nada — é só estatística do Google.' },
+    { id: 'p9', t: 'Para que você vai usar → marcar a opção que fala em contatos / leads',
+      d: 'Também não muda nada. Se nenhuma parecer exata, escolha a mais próxima e siga.' },
+    { id: 'p10', t: 'Clicar em "Criar"',
+      d: 'Aqui parece que acabou. Não acabou — falta a Parte 2, que é a que gera o código.' },
+    { id: 'p11', t: 'Aceitar os termos: escolher Brasil, marcar as caixinhas, aceitar',
+      d: 'Abre uma janela de termos. Escolha Brasil na lista de países. O botão de aceitar fica no rodapé dessa janela — se ele estiver apagado (cinza), é porque falta marcar uma caixinha ou escolher o país.' }
+  ];
+
+  var P2 = [
+    { id: 'q1', destaque: true, t: 'Dos três botões, clicar em "Web"',
+      d: 'Os três são: Web, App Android e App iOS. O seu é o primeiro. Se você clicar num dos de aplicativo por engano, não é grave — dá para criar outro depois.' },
+    { id: 'q2', destaque: true, t: 'No endereço do site, escrever só espacozoe.psc.br',
+      d: 'Sem https:// e sem www. O "https" já vem numa caixinha separada, do lado esquerdo do campo — só confira que está em https e não em http.' },
+    { id: 'q3', t: 'No nome, escrever Espaco Zoe site',
+      d: 'É só um apelido para você reconhecer depois. Qualquer nome serve.' },
+    { id: 'q4', t: 'Deixar a chavinha ligada, do jeito que veio',
+      d: 'Abaixo dos campos tem uma chave de liga/desliga que já vem ligada. Se você desligar, o medidor para de contar as páginas vistas e o site parece não medir nada. Não toque nela.' },
+    { id: 'q5', destaque: true, t: 'Clicar em "Criar fluxo"',
+      d: 'É o clique que faz o código nascer. Depois dele, a tela dos detalhes abre sozinha.' },
+    { id: 'q6', destaque: true, t: 'Copiar o código da PRIMEIRA LINHA da tela',
+      d: 'É uma linha curta que começa com G-, tipo G-A1B2C3D4E5. Clicar em cima dele normalmente já copia. Se não copiar, selecione com o dedo e copie na mão.' },
+    { id: 'q7', destaque: true, t: 'Colar o código no campo aqui embaixo',
+      d: 'Só o código, nada mais. Depois toque no botão verde e me manda no WhatsApp. Aí acabou o seu trabalho — quem coloca isso no site sou eu.' }
+  ];
+
+  var AVISOS = [
+    { b: 'Tem um segundo código na mesma tela, e ele não serve.',
+      t: 'É um que é só número, sem letra nenhuma na frente. Regra sem exceção: <b>se não começa com G-, é o errado.</b>' },
+    { b: 'Se aparecer um blocão de programação, não é isso.',
+      t: 'Dez linhas ou mais, cheias de sinais de maior e menor e a palavra "script". Ele parece mais importante porque é maior, e o código G- aparece dentro dele — mas o que eu preciso é <b>uma linha curta</b>. Feche e volte para a primeira linha da tela.' },
+    { b: 'Não clique em nada escrito "Excluir fluxo".',
+      t: 'É o único botão dessa tela que não tem volta. Do resto pode ficar tranquilo: se apagar conta ou propriedade por engano, vai para a lixeira e fica 35 dias — a gente restaura. Só o "Excluir fluxo" não dá.' }
+  ];
+
+  var EXTRA = [
+    { id: 'e1', t: 'Administrador → Gerenciamento de acesso → botão "+" → Adicionar usuários',
+      d: 'O "Administrador" fica no menu do lado esquerdo, embaixo.' },
+    { id: 'e2', t: 'Colar o meu e-mail, escolher o nível "Editor" e clicar em "Adicionar"',
+      d: 'Toque no botão abaixo para copiar o meu e-mail já certinho, em vez de digitar. <button type="button" id="btn-email" class="limpo" style="margin-top:8px;padding:8px 12px;font-size:13.5px">Copiar o e-mail do Leandro</button> <span id="ok-email" style="font-size:13px;color:var(--verde)"></span><br><br>Você <b>não me passa senha de nada</b> — eu entro com a minha própria conta. E pode me tirar de lá quando quiser, na mesma tela.' }
+  ];
+
+  var CHAVE = 'zoe_ga4_v1';
+  var estado = {};
+  try { estado = JSON.parse(localStorage.getItem(CHAVE) || '{}') || {}; } catch (e) { estado = {}; }
+
+  function salva() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {}
+  }
+
+  var CHECK = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+  function monta(alvo, itens) {
+    var ul = document.getElementById(alvo);
+    if (!ul) return;
+    itens.forEach(function (it) {
+      var li = document.createElement('li');
+      li.className = 'item' + (it.destaque ? ' destaque' : '');
+      li.innerHTML =
+        '<label class="toque"><input type="checkbox" data-id="' + it.id + '">' +
+        '<span class="caixa">' + CHECK + '</span>' +
+        '<span class="txt"><b>' + it.t + '</b><small>' + it.d + '</small></span></label>';
+      ul.appendChild(li);
+      var cx = li.querySelector('input');
+      cx.checked = !!estado[it.id];
+      if (cx.checked) li.classList.add('feito');
+      cx.addEventListener('change', function () {
+        estado[it.id] = cx.checked;
+        li.classList.toggle('feito', cx.checked);
+        salva(); progresso();
+      });
+    });
+  }
+
+  monta('lista-p1', P1);
+  monta('lista-p2', P2);
+  monta('lista-extra', EXTRA);
+
+  var divA = document.getElementById('avisos');
+  AVISOS.forEach(function (a) {
+    var d = document.createElement('div');
+    d.className = 'aviso-caixa';
+    d.innerHTML = '<b>' + a.b + '</b><br>' + a.t;
+    divA.appendChild(d);
+  });
+
+  // O contador olha só os passos de verdade (Parte 1 + Parte 2). O bloco extra
+  // é opcional e não deve fazer a barra parecer incompleta.
+  var TOTAL = P1.length + P2.length;
+  function progresso() {
+    var n = 0;
+    P1.concat(P2).forEach(function (it) { if (estado[it.id]) n++; });
+    document.getElementById('preenche').style.width = (n / TOTAL * 100) + '%';
+    document.getElementById('conta').textContent = n + ' de ' + TOTAL;
+  }
+
+  // Validação do código: pega os três erros de copiar antes de ele mandar.
+  var campo = document.getElementById('cod-g');
+  var vd = document.getElementById('veredito');
+  campo.value = estado.codigo || '';
+
+  function confere() {
+    var v = (campo.value || '').trim();
+    estado.codigo = v; salva();
+    if (!v) { vd.textContent = ''; vd.style.color = 'var(--suave)'; return false; }
+    if (/<|script|gtag/i.test(v)) {
+      vd.innerHTML = 'Esse é o blocão de programação, não é o código. Volte na tela e pegue a <b>primeira linha</b>, aquela curtinha que começa com G-.';
+      vd.style.color = 'var(--terra)'; return false;
+    }
+    if (/^\d+$/.test(v)) {
+      vd.innerHTML = 'Esse é o código que é só número — é o outro, o que não serve. O que eu preciso começa com <b>G-</b>.';
+      vd.style.color = 'var(--terra)'; return false;
+    }
+    if (!/^G-[A-Z0-9]{6,}$/i.test(v)) {
+      vd.innerHTML = 'Ainda não parece o código certo. Ele começa com <b>G-</b> e depois tem umas 10 letras e números embaralhados, sem espaço.';
+      vd.style.color = 'var(--terra)'; return false;
+    }
+    vd.innerHTML = '✓ É esse. Agora toque no botão verde e me manda.';
+    vd.style.color = 'var(--verde)'; return true;
+  }
+  campo.addEventListener('input', confere);
+  confere();
+
+  function copia(txt, aviso) {
+    function fallback() {
+      var t = document.createElement('textarea');
+      t.value = txt; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(aviso, function () { fallback(); aviso(); });
+    } else { fallback(); aviso(); }
+  }
+
+  var btn = document.getElementById('btn-copiar');
+  btn.addEventListener('click', function () {
+    var ok = confere();
+    if (!ok) {
+      campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      campo.focus();
+      if (!campo.value.trim()) {
+        vd.innerHTML = 'Cole o código aqui primeiro — é a última coisa que falta.';
+        vd.style.color = 'var(--terra)';
+      }
+      return;
+    }
+    var antes = btn.textContent;
+    copia(campo.value.trim(), function () {
+      btn.textContent = '✓ Copiado! Cola no WhatsApp e manda';
+      setTimeout(function () { btn.textContent = antes; }, 2600);
+    });
+  });
+
+  // Montado em pedaços de propósito: este repositório é público, e o padrão do
+  // projeto é não deixar dado pessoal em texto puro no HTML.
+  var bE = document.getElementById('btn-email');
+  if (bE) {
+    bE.addEventListener('click', function () {
+      var e = ['leorochalves', '@', 'gmail', '.', 'com'].join('');
+      copia(e, function () {
+        document.getElementById('ok-email').textContent = 'copiado';
+        setTimeout(function () { document.getElementById('ok-email').textContent = ''; }, 2600);
+      });
+    });
+  }
+
+  document.getElementById('btn-limpar').addEventListener('click', function () {
+    if (!confirm('Isso desmarca tudo e apaga o código digitado. Continuar?')) return;
+    estado = {}; salva();
+    document.querySelectorAll('input[type=checkbox]').forEach(function (c) {
+      c.checked = false; c.closest('.item').classList.remove('feito');
+    });
+    campo.value = ''; confere(); progresso();
+  });
+
+  progresso();
+})();
+</script>
+
+<p class="aviso-salvo env">O que você marcar fica guardado só no seu navegador — não sobe para
+lugar nenhum, e esta página não tem rastreador nenhum.</p>
+
+</body>
+</html>

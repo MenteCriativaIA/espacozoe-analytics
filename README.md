@@ -11,8 +11,8 @@ formato e com a mesma identidade visual.
 
 ## Por que ela existe
 
-O passo a passo anterior, mandado por WhatsApp, estava errado em dois pontos — e a pessoa
-falhou por causa deles:
+Havia um passo a passo anterior, escrito para ir por WhatsApp, e ele estava errado em dois
+pontos. Foi descartado antes de chegar a ser enviado:
 
 1. Dizia que criar a **propriedade** entrega o código `G-`. Não entrega. A propriedade é
    uma pasta vazia; o código só nasce ao criar um **fluxo de dados** do tipo Web dentro
